@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-    compatibilityDate: '2025-05-15',
-    devtools: {enabled: true},
+    compatibilityDate: '2026-02-17',
+    devtools: {enabled: false},
     app: {
         head: {
             link: [{rel: 'icon', type: 'image/x-icon', href: '/favicon.png'}]

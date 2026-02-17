@@ -7,12 +7,14 @@ export interface Post {
     id: number;
     comment: string;
     createdAt: string;
+    repliesFrom: number[];
 }
 
 export interface CreatePost {
     board: string;
     threadId: number;
     comment: string;
+    repliesTo: number[];
 }
 
 export interface Thread {

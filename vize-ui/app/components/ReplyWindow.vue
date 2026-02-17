@@ -3,31 +3,45 @@
 import type {CreatePost} from "~/types/data";
 
 const emit = defineEmits(['closeReply']);
-const prop = defineProps({
-  board: {
-    type: String,
-    required: true
-  },
-  thread: {
-    type: Number,
-    required: true
-  }
+const props = defineProps({
+  board: {type: String, required: true},
+  thread: {type: Number, required: true}
+})
+const input = ref<HTMLTextAreaElement | null>(null);
+const isSubmitting = ref(false);
+const form = ref<CreatePost>({
+  board: props.board,
+  threadId: props.thread,
+  comment: '',
+  repliesTo: []
 })
 
-const form = ref<CreatePost>({
-  board: prop.board,
-  threadId: prop.thread,
-  comment: ''
+onMounted(() => {
+  input.value?.focus();
 })
 
 const appendId = (value: string) => {
-  form.value.comment = `${form.value.comment}>>${value}\n`;
+  form.value.comment += `>>${value}\n`;
+  input.value?.focus();
 }
 defineExpose({appendId});
 
 async function createPost() {
-  await useThreadStore().createPost(form.value);
-  emit('closeReply');
+  if (isSubmitting.value) return;
+  try {
+    isSubmitting.value = true;
+
+    const regex = />>(\d+)/g;
+    const matches = [...form.value.comment.matchAll(regex)];
+    form.value.repliesTo = [... new Set(matches.map(match => parseInt(match[1], 10)))];
+
+    await useThreadStore().createPost(form.value);
+    emit('closeReply');
+  } catch (error) {
+    console.error("Failed to post:", error);
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 </script>
 
@@ -36,13 +50,13 @@ async function createPost() {
     <!--    TODO MAKE IT MOVABLE-->
     <div class="reply-title">
       <span>Reply to thread</span>
-      <span class="reply-title-cross" @click="$emit('closeReply')">x</span>
+      <button class="reply-title-cross" @click="$emit('closeReply')" aria-label="Close">X</button>
     </div>
     <div>
       <input style="width: 75%; margin: 0.25rem 0.25rem 0.25rem 0" placeholder="random">
-      <button style="width: 20%" type="submit">Submit</button>
+      <button style="width: 20%" type="submit" :disabled="isSubmitting">{{ isSubmitting ? '...' : 'Submit' }}</button>
     </div>
-    <textarea v-model="form.comment" class="reply-comment" placeholder="Comment"/>
+    <textarea ref="input" v-model="form.comment" class="reply-comment" placeholder="Comment"/>
     <!--    TODO CAPTCHA-->
   </form>
 </template>

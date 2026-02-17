@@ -7,14 +7,17 @@ import com.vize.dto.GetThreadCardResponse;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Records;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import static com.vize.jooq.generated.public_.tables.PostReplies.POST_REPLIES;
 import static com.vize.jooq.generated.public_.tables.Posts.POSTS;
 import static com.vize.jooq.generated.public_.tables.Threads.THREADS;
 import static org.jooq.impl.DSL.multisetAgg;
+import static org.jooq.impl.DSL.select;
 
 @SuppressWarnings("DuplicatedCode")
 @Repository
@@ -28,12 +31,17 @@ public class ThreadRepository {
         return context.select(
                 THREADS.ID.as("id"),
                 THREADS.NAME.as("name"),
-                multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT)
+                multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
+                        select(POST_REPLIES.REPLY_FROM)
+                                .from(POST_REPLIES)
+                                .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID))
+                ))
                         .orderBy(POSTS.ID.asc())
                         .convertFrom(x -> x.map(record -> new GetPostResponse(
                                 record.component1(),
                                 record.component2(),
-                                record.component3().format(formatter)
+                                record.component3().format(formatter),
+                                record.component4().getValues(POST_REPLIES.REPLY_FROM)
                         ))))
                 .from(THREADS)
                 .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD_CODE.eq(board)))
@@ -61,12 +69,17 @@ public class ThreadRepository {
         return context.select(
                         THREADS.ID.as("id"),
                         THREADS.NAME.as("name"),
-                        multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT)
+                        multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
+                                select(POST_REPLIES.REPLY_FROM)
+                                        .from(POST_REPLIES)
+                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID))
+                        ))
                                 .orderBy(POSTS.ID.asc())
                                 .convertFrom(x -> x.map(record -> new GetPostResponse(
                                         record.component1(),
                                         record.component2(),
-                                        record.component3().format(formatter)
+                                        record.component3().format(formatter),
+                                        record.component4().getValues(POST_REPLIES.REPLY_FROM)
                                 ))))
                 .from(THREADS)
                 .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD_CODE.eq(code)))

@@ -2,6 +2,7 @@
 import {useThreadStore} from "~/stores/threads";
 import type {OpPost} from "~/types/data";
 import ReplyWindow from "~/components/ReplyWindow.vue";
+import {nextTick} from "../../../../.nuxt/imports";
 
 const route = useRoute();
 const boardStore = useBoardStore();
@@ -68,6 +69,8 @@ const reply = async (postId: string) => {
           <span class="thread-post-details-date">{{ post.createdAt }}&ensp;</span>
           <span>№</span>
           <span class="thread-post-details-id" @click="reply(post.id.toString())">{{ post.id }}</span>
+          &nbsp;▶
+          <span class="thread-post-replies" v-for="reply in post.repliesFrom">>>{{ reply }}</span>
         </div>
         <article class="thread-post-comment">{{ post.comment }}</article>
       </div>
@@ -87,6 +90,9 @@ const reply = async (postId: string) => {
   word-break: break-word
   word-wrap: break-word
 
+.thread-post-replies
+  margin-left: 0.75rem
+
 .thread-op-image-id
   float: left
   display: block
@@ -105,6 +111,7 @@ const reply = async (postId: string) => {
   padding: 1rem
   overflow: auto
   display: block
+  white-space: pre-wrap
 
 .thread-post-body
   padding-left: 2rem

@@ -43,7 +43,7 @@ public class PostController {
     }
 
     @GetMapping("/count/{board}")
-    public Integer countPostsPerBoard(@PathVariable("board") String board) {
+    public Integer countPostsPerBoard(@PathVariable String board) {
         return postRepository.countPostsPerBoard(board);
     }
 

@@ -1,8 +1,11 @@
 package com.vize.dto;
 
+import java.util.List;
+
 public record GetPostResponse(
         Integer id,
         String comment,
-        String createdAt
+        String createdAt,
+        List<Integer> repliesFrom
 ) {
 }

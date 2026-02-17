@@ -3,6 +3,8 @@ package com.vize.dto;
 import com.vize.validation.ExistingBoard;
 import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
+
 public record CreatePostRequest(
         @NotBlank
         @ExistingBoard
@@ -11,6 +13,8 @@ public record CreatePostRequest(
         @NotBlank
         String comment,
 
-        Integer threadId
+        Integer threadId,
+
+        List<Integer> repliesTo
 ) {
 }
