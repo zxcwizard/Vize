@@ -29,20 +29,20 @@ public class ThreadRepository {
 
     public GetFullThreadResponse getFullThread(String board, Integer thread) {
         return context.select(
-                THREADS.ID.as("id"),
-                THREADS.NAME.as("name"),
-                multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
-                        select(POST_REPLIES.REPLY_FROM)
-                                .from(POST_REPLIES)
-                                .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID))
-                ))
-                        .orderBy(POSTS.ID.asc())
-                        .convertFrom(x -> x.map(record -> new GetPostResponse(
-                                record.component1(),
-                                record.component2(),
-                                record.component3().format(formatter),
-                                record.component4().getValues(POST_REPLIES.REPLY_FROM)
-                        ))))
+                        THREADS.ID.as("id"),
+                        THREADS.NAME.as("name"),
+                        multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
+                                select(POST_REPLIES.REPLY_FROM)
+                                        .from(POST_REPLIES)
+                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD_CODE.eq(POSTS.BOARD_CODE)))
+                        ))
+                                .orderBy(POSTS.ID.asc())
+                                .convertFrom(x -> x.map(record -> new GetPostResponse(
+                                        record.component1(),
+                                        record.component2(),
+                                        record.component3().format(formatter),
+                                        record.component4().getValues(POST_REPLIES.REPLY_FROM)
+                                ))))
                 .from(THREADS)
                 .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD_CODE.eq(board)))
                 .where(THREADS.BOARD_CODE.eq(board).and(THREADS.ID.eq(thread)))
@@ -72,7 +72,7 @@ public class ThreadRepository {
                         multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
                                 select(POST_REPLIES.REPLY_FROM)
                                         .from(POST_REPLIES)
-                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID))
+                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD_CODE.eq(POSTS.BOARD_CODE)))
                         ))
                                 .orderBy(POSTS.ID.asc())
                                 .convertFrom(x -> x.map(record -> new GetPostResponse(

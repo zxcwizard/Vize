@@ -24,7 +24,7 @@ public class PostController {
     public GetPostResponse createPost(@RequestBody @Validated CreatePostRequest post,
                                       @CookieValue(name = "guest_id") String guestId, HttpServletResponse response) {
         log.info("New uuid: {}", guestId);
-        if(guestId == null || guestId.isEmpty()) {
+        if (guestId == null || guestId.isEmpty()) {
             UUID uuid = UUID.randomUUID();
             Cookie cookie = new Cookie("guest_id", uuid.toString());
             cookie.setPath("/");

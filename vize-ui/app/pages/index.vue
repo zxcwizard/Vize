@@ -13,12 +13,12 @@ const threadLength = 8;
 
     <h2 class="popular-threads-text">Popular threads</h2>
     <div class="popular-threads">
-<!--      <ThreadCard-->
-<!--          v-for="index in threadLength"-->
-<!--          :key="index"-->
-<!--          :name="'strqweqwe'"-->
-<!--          :comment="'index'"-->
-<!--      />-->
+      <!--      <ThreadCard-->
+      <!--          v-for="index in threadLength"-->
+      <!--          :key="index"-->
+      <!--          :name="'strqweqwe'"-->
+      <!--          :comment="'index'"-->
+      <!--      />-->
     </div>
     <div class="statistics-box">
       <div class="stats-grid">

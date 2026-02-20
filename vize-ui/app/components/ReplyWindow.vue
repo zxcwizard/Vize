@@ -31,9 +31,9 @@ async function createPost() {
   try {
     isSubmitting.value = true;
 
-    const regex = />>(\d+)/g;
-    const matches = [...form.value.comment.matchAll(regex)];
-    form.value.repliesTo = [... new Set(matches.map(match => parseInt(match[1], 10)))];
+    const matches = [...form.value.comment.matchAll(/>>(\d+)/g)];
+    const replyIds = matches.map((match) => Number(match[1]));
+    form.value.repliesTo = [...new Set(replyIds)];
 
     await useThreadStore().createPost(form.value);
     emit('closeReply');
@@ -50,7 +50,7 @@ async function createPost() {
     <!--    TODO MAKE IT MOVABLE-->
     <div class="reply-title">
       <span>Reply to thread</span>
-      <button class="reply-title-cross" @click="$emit('closeReply')" aria-label="Close">X</button>
+      <button class="reply-title-cross" aria-label="Close" @click="$emit('closeReply')">X</button>
     </div>
     <div>
       <input style="width: 75%; margin: 0.25rem 0.25rem 0.25rem 0" placeholder="random">

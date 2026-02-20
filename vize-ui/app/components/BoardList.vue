@@ -2,8 +2,7 @@
 import type {Board} from "~/types/data";
 import {useBoardStore} from "~/stores/boards";
 
-const store =  useBoardStore();
-const boards: Board[] = store.getBoards();
+const boards: Board[] = useBoardStore().getBoards();
 
 </script>
 

@@ -1,7 +1,4 @@
 <script setup lang="ts">
-
-const route = useRoute();
-const boardStore = useBoardStore();
 const threadStore = useThreadStore();
 
 definePageMeta({
@@ -11,10 +8,10 @@ definePageMeta({
 const boardCode = computed(() => useRoute().params.board as string);
 const board = computed(() => useBoardStore().getBoard(boardCode.value));
 
-const { data, refresh } = await useAsyncData(
+const {data, refresh} = await useAsyncData(
     () => `threads-${boardCode.value}`,
     () => threadStore.fetchThreads(boardCode.value),
-    { watch: [boardCode]  }
+    {watch: [boardCode]}
 )
 
 const isCreatingThread = ref(false);
@@ -32,7 +29,7 @@ async function createThread() {
     body: form.value
   })
   isCreatingThread.value = false;
-  refresh();
+  await refresh();
 }
 </script>
 

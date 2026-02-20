@@ -24,7 +24,7 @@ export const useThreadStore = defineStore('threads', {
             });
         },
 
-        getPosts: (state) => (boardCode: string, threadId: number) => {
+        getReplies: (state) => (boardCode: string, threadId: number) => {
             const thread = state.threadsByBoard[boardCode]?.[threadId];
             return thread ? thread.posts.slice(1) : []
         },
@@ -55,9 +55,9 @@ export const useThreadStore = defineStore('threads', {
 
                 this.threadsByBoard[boardCode] = normalized;
                 return data;
-            } catch (err: any) {
-                this.error[boardCode] = err.message
-                throw err
+            } catch (err: unknown) {
+                this.error[boardCode] = err instanceof Error ? err.message : 'An unknown error occurred';
+                throw err;
             }
         },
 
@@ -69,9 +69,9 @@ export const useThreadStore = defineStore('threads', {
                     state.threadsByBoard[boardCode][threadId] = data
                 })
                 return data;
-            } catch (err: any) {
-                this.error[boardCode] = err.message
-                throw err
+            } catch (err: unknown) {
+                this.error[boardCode] = err instanceof Error ? err.message : 'An unknown error occurred';
+                throw err;
             }
         },
 

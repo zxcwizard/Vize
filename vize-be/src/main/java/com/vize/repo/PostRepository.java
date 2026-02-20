@@ -44,7 +44,7 @@ public class PostRepository {
                         DSL.inline(new Integer[0]).as("replies_from"))
                 .fetchOneInto(GetPostResponse.class);
 
-        if(newPost != null && newPost.id() != null)
+        if (newPost != null && newPost.id() != null)
             for (Integer replyToId : post.repliesTo()) {
                 context.insertInto(POST_REPLIES, POST_REPLIES.REPLY_FROM, POST_REPLIES.REPLY_TO, POST_REPLIES.BOARD_CODE)
                         .values(newPost.id(), replyToId, post.board())
