@@ -49,7 +49,7 @@ export const useThreadStore = defineStore('threads', {
     actions: {
         async fetchThreads(boardCode: string) {
             try {
-                const data = await $fetch<Thread[]>(`${useRuntimeConfig().public.backendUrl}/threads/${boardCode}`)
+                const data = await $fetch<Thread[]>(`/api/threads/${boardCode}`)
                 const normalized: Record<number, Thread> = {};
                 data.forEach(t => { normalized[t.id] = t; });
 
@@ -63,7 +63,7 @@ export const useThreadStore = defineStore('threads', {
 
         async fetchThread(boardCode: string, threadId: number) {
             try {
-                const data = await $fetch<Thread>(`${useRuntimeConfig().public.backendUrl}/threads/${boardCode}/${threadId}`)
+                const data = await $fetch<Thread>(`/api/threads/${boardCode}/${threadId}`)
                 this.$patch((state) => {
                     if (!state.threadsByBoard[boardCode]) state.threadsByBoard[boardCode] = {}
                     state.threadsByBoard[boardCode][threadId] = data
@@ -77,7 +77,7 @@ export const useThreadStore = defineStore('threads', {
 
         async createPost(post: CreatePost) {
             try {
-                const createdPost = await $fetch<Post>(`${useRuntimeConfig().public.backendUrl}/posts`, {
+                const createdPost = await $fetch<Post>(`/api/posts`, {
                     method: 'POST',
                     credentials: 'include',
                     body: post

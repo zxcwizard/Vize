@@ -22,18 +22,18 @@ public class PostController {
 
     @PostMapping
     public GetPostResponse createPost(@RequestBody @Validated CreatePostRequest post,
-                                      @CookieValue(name = "guest_id") String guestId, HttpServletResponse response) {
-        log.info("New uuid: {}", guestId);
+                                      @CookieValue(name = "guest_id", required = false) String guestId, HttpServletResponse response) {
         if (guestId == null || guestId.isEmpty()) {
             UUID uuid = UUID.randomUUID();
             Cookie cookie = new Cookie("guest_id", uuid.toString());
             cookie.setPath("/");
             cookie.setHttpOnly(true);
-            //        cookie.setSecure(true);
+            cookie.setSecure(true);
             response.addCookie(cookie);
-
+            log.info("New uuid: {}", uuid);
             return postRepository.createPost(post, uuid);
         }
+        log.info("New uuid: {}", guestId);
         return postRepository.createPost(post, UUID.fromString(guestId));
     }
 

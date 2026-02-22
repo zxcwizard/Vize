@@ -1,4 +1,3 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2026-02-17',
     devtools: {enabled: true},
@@ -7,9 +6,11 @@ export default defineNuxtConfig({
             link: [{rel: 'icon', type: 'image/x-icon', href: '/favicon.png'}]
         }
     },
-    runtimeConfig: {
-        public: {
-            backendUrl: 'http://localhost:8080'
+    nitro: {
+        routeRules: {
+            '/api/**': {
+                proxy: 'http://localhost:8080/api/**'
+            }
         }
     },
     modules: [

@@ -16,23 +16,24 @@ import static org.springframework.http.HttpHeaders.*;
 @RequiredArgsConstructor
 public class BeanConfig {
 
-    @Bean
-    public CorsFilter corsFilter() {
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        final CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-        config.setAllowedHeaders(Arrays.asList(
-                ORIGIN,
-                CONTENT_TYPE,
-                ACCEPT,
-                AUTHORIZATION
-        ));
-        config.setAllowedMethods(Arrays.asList(
-                "GET", "POST", "PUT", "DELETE", "PATCH"
-        ));
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
+//  We run nuxt dev proxy instead
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        final CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
+//        config.setAllowedHeaders(Arrays.asList(
+//                ORIGIN,
+//                CONTENT_TYPE,
+//                ACCEPT,
+//                AUTHORIZATION
+//        ));
+//        config.setAllowedMethods(Arrays.asList(
+//                "GET", "POST", "PUT", "DELETE", "PATCH"
+//        ));
+//        source.registerCorsConfiguration("/**", config);
+//        return new CorsFilter(source);
+//    }
 }
 

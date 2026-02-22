@@ -26,7 +26,7 @@ export const useBoardStore = defineStore('boardList', {
         async fetchBoards() {
             if (this.boards.length) return
             try {
-                this.boards = await $fetch<Board[]>(`${useRuntimeConfig().public.backendUrl}/boards`) || [];
+                this.boards = await $fetch<Board[]>(`/api/boards`) || [];
             } catch (error) {
                 console.error('Failed to init boards', error)
             }

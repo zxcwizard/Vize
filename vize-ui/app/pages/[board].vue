@@ -24,7 +24,7 @@ const form = ref({
 )
 
 async function createThread() {
-  await $fetch(`${useRuntimeConfig().public.backendUrl}/threads`, {
+  await $fetch(`/api/threads`, {
     method: 'POST',
     body: form.value
   })
