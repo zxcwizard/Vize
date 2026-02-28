@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {useThreadStore} from "~/stores/threads";
 import ReplyWindow from "~/components/ReplyWindow.vue";
+import PostItem from "~/components/PostItem.vue";
 import {nextTick} from "vue";
 
 const route = useRoute();
@@ -17,6 +18,7 @@ const {data, refresh} = await useAsyncData(
 )
 
 const op = computed(() => threadStore.getOpPost(board.value.code, threadId.value));
+
 const postMap = computed(() => {
   const map = new Map();
   if (op.value) map.set(op.value.id.toString(), op.value);
@@ -57,14 +59,15 @@ const handleMouseEnter = (id: string, event: MouseEvent) => {
 
   target = document.getElementById(id);
   activeId.value = id;
-
   mousePos.x = event.clientX + 15;
   mousePos.y = event.clientY + 15;
+
   if (target) {
     const rect = target.getBoundingClientRect();
+    const buffer = 10;
     isTargetInViewport.value = (
-        rect.top >= -10 &&
-        rect.bottom <= window.innerHeight + 10
+        rect.top >= -buffer &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) + buffer
     );
   } else {
     isTargetInViewport.value = false;
@@ -74,120 +77,58 @@ const handleMouseEnter = (id: string, event: MouseEvent) => {
 const handleMouseLeave = () => {
   activeId.value = null
 }
-
-const formatComment = (comment: string) => {
-  if (!comment) return '';
-  return comment.replace(/>>(\d+)(?:\s\(OP\))?/g, '<a class="quotelink" data-id="$1" href="#$1">$&</a>');
-}
 </script>
 
 <template>
   <div class="thread-body">
     <div class="thread-catalog-header">
-      <img
-          class="thread-catalog-img"
-          src="/temp-title.png" alt="header">
+      <img class="thread-catalog-img" src="/temp-title.png" alt="header">
       <div class="thread-catalog-board-list">/{{ board.code }}/ - {{ board.name }}</div>
     </div>
     <hr>
-    <div>
-      <button class="update-btn" @click="() => refresh()">Update</button>
-    </div>
+    <button class="update-btn" @click="() => refresh()">Update</button>
     <hr>
     <ReplyWindow
-        v-if="isReplying"
-        ref="replyWindow"
-        :board="board.code"
-        :thread="threadId"
+        v-if="isReplying" ref="replyWindow" :board="board.code" :thread="threadId"
         @close-reply="isReplying = false;"/>
 
     <div
         :id="op.id.toString()"
         :class="['thread-op-body', { 'highlighted': activeId === op.id.toString() && isTargetInViewport }]">
-      <div class="thread-op-images">
-        <figure class="thread-image-id">
-          <figcaption>
-            img data
-          </figcaption>
-          <a><img
-              src="/home/ranmaru/Pictures/pfp/d6b3a76086be1a412b96321243b600ca50e8c9cd59591b65120e2a2b4620ea82.jpg"
-              alt="20x20"></a>
-        </figure>
-      </div>
-      <div class="thread-op-details">
-        <span class="thread-post-details-name">{{ op.name }}&ensp;</span>
-        <span class="thread-post-details-user">Anonymous&ensp;</span>
-        <span class="thread-post-details-date">{{ op.createdAt }}&ensp;</span>
-        <span>№</span>
-        <span class="thread-post-details-id" @click="reply(`${op.id.toString()} (OP)`)">{{ op.id }}</span>
-        <a
-            v-for="replyId in op.repliesFrom" :key="replyId" :href="`#${replyId}`"
-            class="thread-post-replies"
-            @mouseover="handleMouseEnter(replyId.toString(), $event)"
-            @mouseleave="handleMouseLeave">>{{ replyId }}
-        </a>
-      </div>
-      <article class="thread-op-comment">{{ op.comment }}</article>
+      <PostItem :post="op" @reply="reply">
+        <template #backlinks>
+          <a
+              v-for="replyId in op.repliesFrom" :key="replyId" :href="`#${replyId}`" class="thread-post-replies"
+              @mouseover="handleMouseEnter(replyId.toString(), $event)" @mouseleave="handleMouseLeave">>>{{
+              replyId
+            }}</a>
+        </template>
+      </PostItem>
     </div>
 
     <div
-        v-for="post in data?.posts.slice(1)"
-        :id="post.id.toString()"
-        :key="post.id"
+        v-for="post in data?.posts.slice(1)" :id="post.id.toString()" :key="post.id"
         :class="['thread-post-body', { 'highlighted': activeId === post.id.toString() && isTargetInViewport }]">
       <div class="thread-arrows">>></div>
-      <span class="thread-post-details-user">Anonymous&ensp;</span>
-      <span class="thread-post-details-date">{{ post.createdAt }}&ensp;</span>
-      <span>№</span>
-      <span class="thread-post-details-id" @click="reply(post.id.toString())">{{ post.id }}</span>&nbsp;▶
-      <a
-          v-for="replyId in post.repliesFrom" :key="replyId" :href="`#${replyId}`"
-          class="thread-post-replies"
-          @mouseover="handleMouseEnter(replyId.toString(), $event)"
-          @mouseleave="handleMouseLeave">>>{{ replyId }}</a>
-      <div class="thread-post-images">
-        <!--      TODO list images (figures)-->
-        <figure class="thread-image-id">
-          <figcaption>
-            img data
-          </figcaption>
-          <a><img
-              src="/home/ranmaru/Pictures/pfp/d6b3a76086be1a412b96321243b600ca50e8c9cd59591b65120e2a2b4620ea82.jpg"
-              alt="20x20"></a>
-        </figure>
-      </div>
-      <article
-          v-dompurify-html="formatComment(post.comment)"
-          class="thread-post-comment"
-          @mouseover="handleMouseEnter('reply', $event)"
-          @mouseleave="handleMouseLeave"/>
+      <PostItem
+          :post="post" is-preview @reply="reply" @hover="handleMouseEnter('reply', $event)"
+          @mouseleave="handleMouseLeave">
+        <template #backlinks>
+          <a
+              v-for="replyId in post.repliesFrom" :key="replyId" :href="`#${replyId}`" class="thread-post-replies"
+              @mouseover="handleMouseEnter(replyId.toString(), $event)" @mouseleave="handleMouseLeave">>>{{
+              replyId
+            }}</a>
+        </template>
+      </PostItem>
     </div>
+
     <Teleport to="body">
       <div
           v-if="activeId && !isTargetInViewport && hoveredPostData"
           class="floating-preview thread-post-body"
-          :style="{
-            top: mousePos.y + 'px',
-            left: mousePos.x + 'px',
-            minWidth: '55rem'}"
-      >
-          <span v-if="'name' in hoveredPostData" class="thread-post-details-name">
-            {{ hoveredPostData.name }}&ensp;</span>
-        <span class="thread-post-details-user">Anonymous &ensp;</span>
-        <span class="thread-post-details-date">{{ hoveredPostData.createdAt }}&ensp;</span>
-        <span>№</span>
-        <span class="thread-post-details-id">{{ hoveredPostData.id }}</span>
-
-        <div class="thread-post-images">
-          <figure class="thread-image-id">
-            <figcaption>img data</figcaption>
-            <a>
-              <img src="/home/ranmaru/Pictures/pfp/d6b3a76086be1a412b96321243b600ca50e8c9cd59591b65120e2a2b4620ea82.jpg"
-                   alt="20x20">
-            </a>
-          </figure>
-        </div>
-        <article class="thread-post-comment">{{ hoveredPostData.comment }}</article>
+          :style="{ top: mousePos.y + 'px', left: mousePos.x + 'px', minWidth: '55rem' }">
+        <PostItem :post="hoveredPostData"/>
       </div>
     </Teleport>
   </div>
@@ -198,40 +139,9 @@ const formatComment = (comment: string) => {
   margin-left: 2rem
   margin-right: 2rem
 
-.thread-op-details
-  padding-top: 1rem
-  display: flex
-  flex-wrap: nowrap
-  white-space: nowrap
-  align-items: center
-
-.thread-post-replies
-  color: blue
-  margin-left: 0.75rem
-
-.thread-post-replies:hover
-  color: green
-
-.thread-image-id
-  float: left
-  flex-flow: row wrap
-  margin: 0 1rem 0 0
-  box-sizing: border-box
-  word-break: break-word
-  word-wrap: break-word
-
-.thread-op-comment
-  padding: 2rem
-  overflow: auto
+.thread-op-body
   display: block
-
-.thread-post-comment
-  margin-left: 1rem
-  line-height: 1.5
   padding: 1rem
-  display: block
-  white-space: pre-wrap
-  word-break: break-word
 
 .thread-post-body
   display: flow-root
@@ -242,12 +152,16 @@ const formatComment = (comment: string) => {
 
 .thread-arrows
   float: left
-  margin-top: 1px
   margin-right: 1rem
 
-.thread-post-details-name
-  font-weight: bold
-  color: cornflowerblue
+.thread-post-replies
+  color: blue
+  margin-left: 1rem
+  text-decoration: underline
+  cursor: pointer
+
+  &:hover
+    color: green
 
 .highlighted
   background-color: #fff9c4 !important
@@ -262,33 +176,6 @@ const formatComment = (comment: string) => {
   box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.3)
   border: 1px solid #aaa
   max-width: 500px
-  margin: 0
-  display: flow-root
-
-.thread-catalog-header
-  text-align: center
-
-.thread-catalog-img
-  width: 500px
-  height: 150px
-
-.thread-catalog-board-list
-  font-size: clamp(1rem, 15vw, 3rem)
-  font-weight: 650
-  letter-spacing: 0.05em
-  text-transform: uppercase
-  background: linear-gradient(90deg, #15803d, #22c55e, #7dd3fc, #2563eb)
-  background-size: 300% 100%
-  background-clip: text
-  -webkit-background-clip: text
-  -webkit-text-fill-color: transparent
-  animation: gradientFlow 3s ease-in-out infinite alternate
-
-  @keyframes gradientFlow
-    0%
-      background-position: 0 0
-    100%
-      background-position: 100% 0
 
 .update-btn
   display: inline-block
@@ -308,11 +195,25 @@ const formatComment = (comment: string) => {
     transform: translateY(1px)
     background-color: #333
 
-.thread-post-comment
-  :deep(a.quotelink)
-    color: blue
-    text-decoration: underline
+.thread-catalog-header
+  text-align: center
 
-    &:hover
-      text-decoration: underline
+.thread-catalog-img
+  width: 500px
+  height: 150px
+
+.thread-catalog-board-list
+  font-size: clamp(1rem, 15vw, 3rem)
+  font-weight: 650
+  background: linear-gradient(90deg, #15803d, #22c55e, #7dd3fc, #2563eb)
+  background-clip: text
+  -webkit-background-clip: text
+  -webkit-text-fill-color: transparent
+  animation: gradientFlow 3s ease-in-out infinite alternate
+
+@keyframes gradientFlow
+  0%
+    background-position: 0 0
+  100%
+    background-position: 100% 0
 </style>
