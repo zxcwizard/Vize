@@ -15,9 +15,9 @@ export const useThreadStore = defineStore('threads', {
             return state.threadsByBoard[boardCode]?.[threadId];
         },
 
-        getThreads: (state) => (boardCode: string)  => {
+        getThreads: (state) => (boardCode: string) => {
             const threads = state.threadsByBoard[boardCode];
-            if(!threads) return [];
+            if (!threads) return [];
 
             return Object.values(threads).sort((a, b) => {
                 return b.id - a.id;
@@ -30,7 +30,7 @@ export const useThreadStore = defineStore('threads', {
         },
 
         getOpPost: (state) => (boardCode: string, threadId: number): OpPost => {
-            if(!state.threadsByBoard[boardCode] || !state.threadsByBoard[boardCode][threadId])
+            if (!state.threadsByBoard[boardCode] || !state.threadsByBoard[boardCode][threadId])
                 throw Error(`Failed to fetch thread for [${boardCode} ${threadId}]`)
             const thread = state.threadsByBoard[boardCode][threadId]
             const firstPost = thread.posts[0]
@@ -41,7 +41,8 @@ export const useThreadStore = defineStore('threads', {
                 id: thread.id,
                 comment: firstPost.comment,
                 createdAt: firstPost.createdAt,
-                name: thread.name
+                name: thread.name,
+                repliesFrom: firstPost.repliesFrom
             }
         }
     },
@@ -51,7 +52,9 @@ export const useThreadStore = defineStore('threads', {
             try {
                 const data = await $fetch<Thread[]>(`/api/threads/${boardCode}`)
                 const normalized: Record<number, Thread> = {};
-                data.forEach(t => { normalized[t.id] = t; });
+                data.forEach(t => {
+                    normalized[t.id] = t;
+                });
 
                 this.threadsByBoard[boardCode] = normalized;
                 return data;
@@ -75,17 +78,23 @@ export const useThreadStore = defineStore('threads', {
             }
         },
 
-        async createPost(post: CreatePost) {
+        async createPost(createPost: CreatePost) {
             try {
                 const createdPost = await $fetch<Post>(`/api/posts`, {
                     method: 'POST',
                     credentials: 'include',
-                    body: post
+                    body: createPost
                 })
-                const boardThreads = this.threadsByBoard[post.board]
+                const boardThreads = this.threadsByBoard[createPost.board]
                 if (boardThreads) {
-                    const thread = boardThreads[post.threadId]
-                    if (thread) thread.posts.push(createdPost)
+                    const thread = boardThreads[createPost.threadId]
+                    if (thread) {
+                        thread.posts.forEach(post => {
+                            const match = createPost.repliesTo.find(replyId => replyId === post.id)
+                            if (match) post.repliesFrom.push(createdPost.id)
+                        })
+                        thread.posts.push(createdPost)
+                    }
                 }
             } catch (error) {
                 console.error('Post failed:', error)

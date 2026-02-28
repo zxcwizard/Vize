@@ -28,4 +28,5 @@ export interface OpPost {
     comment: string;
     name: string
     createdAt: string;
+    repliesFrom: number[];
 }
