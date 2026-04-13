@@ -31,14 +31,27 @@ CREATE TABLE posts
     FOREIGN KEY (thread_id, board_code) REFERENCES posts (id, board_code) ON DELETE RESTRICT
 );
 
+CREATE TABLE images
+(
+    id         INTEGER GENERATED ALWAYS AS IDENTITY,
+    md5        VARCHAR(32) UNIQUE,
+    extension  VARCHAR(8),
+    width      SMALLINT,
+    height     SMALLINT,
+    post_id    INTEGER,
+    board_code VARCHAR(5) NOT NULL REFERENCES boards (code) ON DELETE RESTRICT,
+    PRIMARY KEY (id, board_code),
+    FOREIGN KEY (post_id, board_code) REFERENCES posts (id, board_code) ON DELETE RESTRICT
+);
+
 CREATE TABLE post_replies
 (
     reply_from INTEGER,
-    reply_to INTEGER,
+    reply_to   INTEGER,
     board_code VARCHAR(5) NOT NULL REFERENCES boards (code) ON DELETE RESTRICT,
     PRIMARY KEY (reply_to, reply_from, board_code),
-    FOREIGN KEY (reply_from, board_code) REFERENCES posts(id, board_code) ON DELETE CASCADE,
-    FOREIGN KEY (reply_to, board_code) REFERENCES posts(id, board_code) ON DELETE CASCADE,
+    FOREIGN KEY (reply_from, board_code) REFERENCES posts (id, board_code) ON DELETE CASCADE,
+    FOREIGN KEY (reply_to, board_code) REFERENCES posts (id, board_code) ON DELETE CASCADE,
     CHECK ( reply_to < reply_from )
 );
 

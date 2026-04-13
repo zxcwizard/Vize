@@ -99,8 +99,7 @@ async function createThread() {
   font-size: clamp(1rem, 15vw, 3rem)
   font-weight: 650
   letter-spacing: 0.05em
-  text-transform: uppercase
-  background: linear-gradient(90deg, #15803d, #22c55e, #7dd3fc, #2563eb)
+  background: linear-gradient(90deg, #15803d, #22c55e, #3b82f6, #1d4ed8)
   background-size: 300% 100%
   background-clip: text
   -webkit-background-clip: text

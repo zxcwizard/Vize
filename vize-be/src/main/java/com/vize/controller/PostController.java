@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -19,6 +20,11 @@ import java.util.UUID;
 public class PostController {
 
     private final PostRepository postRepository;
+
+    @PostMapping("/img/upload")
+    public String uploadImage(@RequestParam("file") MultipartFile file) {
+        return file.getName();
+    }
 
     @PostMapping
     public GetPostResponse createPost(@RequestBody @Validated CreatePostRequest post,

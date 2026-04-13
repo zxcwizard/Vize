@@ -44,6 +44,8 @@ const hoveredPostData = computed(() => {
   return postMap.value.get(activeId.value) || null;
 });
 
+const isSubscribed = ref(false);
+
 const handleMouseEnter = (id: string, event: MouseEvent) => {
   let target: HTMLElement | null = null;
 
@@ -87,6 +89,13 @@ const handleMouseLeave = () => {
     </div>
     <hr>
     <button class="update-btn" @click="() => refresh()">Update</button>
+    <button
+        class="subscribe-btn"
+        :class="{ 'is-active': isSubscribed }"
+        @click="isSubscribed = !isSubscribed"
+    >
+      {{ isSubscribed ? 'Subscribed' : 'Subscribe' }}
+    </button>
     <hr>
     <ReplyWindow
         v-if="isReplying" ref="replyWindow" :board="board.code" :thread="threadId"
@@ -195,6 +204,16 @@ const handleMouseLeave = () => {
     transform: translateY(1px)
     background-color: #333
 
+.subscribe-btn
+  @extend .update-btn
+  text-align: center
+  min-width: 8rem
+
+  &.is-active
+    background: darkgreen
+    color: #fff
+    border: 1px solid #000
+
 .thread-catalog-header
   text-align: center
 
@@ -205,7 +224,9 @@ const handleMouseLeave = () => {
 .thread-catalog-board-list
   font-size: clamp(1rem, 15vw, 3rem)
   font-weight: 650
-  background: linear-gradient(90deg, #15803d, #22c55e, #7dd3fc, #2563eb)
+  letter-spacing: 0.05em
+  background: linear-gradient(90deg, #15803d, #22c55e, #3b82f6, #1d4ed8)
+  background-size: 300% 100%
   background-clip: text
   -webkit-background-clip: text
   -webkit-text-fill-color: transparent
