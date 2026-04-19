@@ -1,18 +1,19 @@
 <script lang="ts" setup>
 const props = defineProps<{
   threadId: number
+  board: string
 }>();
 
 const {toggleThread, isSubscribed} = useSocketGateway();
 
-const isSubbed = computed(() => isSubscribed(props.threadId));
+const isSubbed = computed(() => isSubscribed(props.board, props.threadId));
 </script>
 
 <template>
   <button
       class="subscribe-btn"
       :class="{ 'is-active': isSubbed }"
-      @click="toggleThread(props.threadId)"
+      @click="toggleThread(props.board, props.threadId)"
   >
     {{ isSubbed ? 'Subscribed' : 'Subscribe' }}
   </button>

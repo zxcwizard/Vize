@@ -1,30 +1,12 @@
 <script setup lang="ts">
-import {useThreadStore} from "~/stores/threads";
 import ReplyWindow from "~/components/ReplyWindow.vue";
 import PostItem from "~/components/PostItem.vue";
 import {nextTick} from "vue";
+import {useSocketGateway} from "../../../composables/useSocket";
+import {useThreadContext} from "../../../composables/useThreadContext";
 
-const route = useRoute();
-const threadStore = useThreadStore();
-const boardStore = useBoardStore();
-
-const board = computed(() => boardStore.getBoard(route.params.code as string));
-const threadId = computed(() => Number(route.params.id as string));
-
-const {data, refresh} = await useAsyncData(
-    () => `thread-${board.value.code}-${threadId.value}`,
-    () => threadStore.fetchThread(board.value.code, threadId.value),
-    {watch: [board.value, threadId]}
-)
-
-const op = computed(() => threadStore.getOpPost(board.value.code, threadId.value));
-
-const postMap = computed(() => {
-  const map = new Map();
-  map.set(op.value.id.toString(), op.value);
-  data.value?.posts.forEach(p => map.set(p.id.toString(), p));
-  return map;
-});
+const {subscriptions} = useSocketGateway();
+const {board, currentThreadId, replies, op, threadRefresh} = useThreadContext();
 
 const isReplying = ref(false);
 const replyWindow = ref<InstanceType<typeof ReplyWindow>>();
@@ -41,7 +23,8 @@ const mousePos = reactive({x: 0, y: 0})
 
 const hoveredPostData = computed(() => {
   if (!activeId.value) return null;
-  return postMap.value.get(activeId.value) || null;
+  if (activeId.value == op.value.id) return op.value;
+  return replies.value.at(activeId.value) || null;
 });
 
 const handleMouseEnter = (id: string, event: MouseEvent) => {
@@ -77,7 +60,6 @@ const handleMouseEnter = (id: string, event: MouseEvent) => {
 const handleMouseLeave = () => {
   activeId.value = null
 }
-const {subscriptions} = useSocketGateway();
 </script>
 
 <template>
@@ -88,14 +70,14 @@ const {subscriptions} = useSocketGateway();
     </div>
     <hr>
     <button class="update-btn" @click="() => refresh()">Update</button>
-    <SubButton :thread-id="threadId"/>
+    <SubButton :thread-id="currentThreadId" :board="board.code"/>
     <div>
       <h1>subbed to</h1>
       <h1>{{ subscriptions }}</h1>
     </div>
     <hr>
     <ReplyWindow
-        v-if="isReplying" ref="replyWindow" :board="board.code" :thread="threadId"
+        v-if="isReplying" ref="replyWindow" :board="board.code" :thread="currentThreadId"
         @close-reply="isReplying = false;"/>
 
     <div
@@ -113,7 +95,7 @@ const {subscriptions} = useSocketGateway();
     </div>
 
     <div
-        v-for="post in data?.posts.slice(1)" :id="post.id.toString()" :key="post.id"
+        v-for="post in replies" :id="post.id.toString()" :key="post.id"
         :class="['thread-post-body', { 'highlighted': activeId === post.id.toString() && isTargetInViewport }]">
       <div class="thread-arrows">>></div>
       <PostItem

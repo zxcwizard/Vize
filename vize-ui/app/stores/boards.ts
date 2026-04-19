@@ -14,10 +14,8 @@ export const useBoardStore = defineStore('boardList', {
             return () => state.boards;
         },
         getBoard: (state) => {
-            return (boardCode: string): Board => {
-                const board = state.boards.find(b => b.code === boardCode)
-                if(!board) throw new Error(`[BoardStore]: Board with code "${boardCode}" not found.`)
-                return board;
+            return (boardCode: string): Board | undefined => {
+                return state.boards.find(b => b.code === boardCode);
             }
         }
     },

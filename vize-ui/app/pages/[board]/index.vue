@@ -1,23 +1,14 @@
 <script setup lang="ts">
-const threadStore = useThreadStore();
+import {useBoardContext} from "../../composables/useBoardContext";
 
 definePageMeta({
   middleware: 'validate-board'
 })
 
-const boardCode = computed(() => useRoute().params.board as string);
-const board = computed(() => useBoardStore().getBoard(boardCode.value));
-
-const {data, refresh} = await useAsyncData(
-    () => `threads-${boardCode.value}`,
-    () => threadStore.fetchThreads(boardCode.value),
-    {watch: [boardCode]}
-)
-
+const {board} = useBoardContext();
+const {threadCardData, threadCardRefresh} = useThreadCardList();
 const isCreatingThread = ref(false);
-
 const form = ref({
-      boardCode: board.value.code,
       name: '',
       comment: ''
     }
@@ -26,10 +17,13 @@ const form = ref({
 async function createThread() {
   await $fetch(`/api/threads`, {
     method: 'POST',
-    body: form.value
+    body: {
+      ...form.value,
+      board: board.value.code
+    }
   })
   isCreatingThread.value = false;
-  await refresh();
+  await threadCardRefresh();
 }
 </script>
 
@@ -58,10 +52,9 @@ async function createThread() {
         <textarea v-model="form.comment" required class="create-thread-text-input" placeholder="Commentary"/>
       </div>
     </form>
-
     <div class="thread-catalog-threads">
       <ThreadCard
-          v-for="thread in data"
+          v-for="thread in threadCardData"
           :id="thread.id"
           :key="thread.id"
           :thread="thread"

@@ -11,7 +11,7 @@ defineProps<{
 <template>
   <div class="thread-сard-body">
     <NuxtLink
-        :to="{ name: 'code-threads-id', params: { code: boardCode, id: thread.id } }"
+        :to="`/${boardCode}/threads/${thread.id}`"
         class="thread-card-img-box">
       <img class="thread-card-img" src="https://picsum.photos/200/200" alt="Random image">
     </NuxtLink>

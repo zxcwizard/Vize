@@ -18,8 +18,7 @@ const boards: Board[] = useBoardStore().getBoards();
     <NuxtLink
         v-for="(board, index) in boards"
         :key="board.code"
-        :to="{ name: 'board', params: { board: board.code } }"
-        external
+        :to="`/${board.code}`"
         class="board-code">
       {{ board.code }}
       <code v-if="index < boards.length - 1">&#47;</code>

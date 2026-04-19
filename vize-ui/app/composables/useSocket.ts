@@ -1,5 +1,5 @@
 const socket = ref<WebSocket | null>(null);
-const subscriptions = ref(new Set<number>());
+const subscriptions = ref(new Set<string>());
 const messages = ref<Record<number, string[]>>({});
 
 export const useSocketGateway = () => {
@@ -36,27 +36,29 @@ export const useSocketGateway = () => {
     };
 
 
-    const isSubscribed = (threadId: number) => subscriptions.value.has(threadId);
+    const isSubscribed = (boardCode: string, threadId: number) =>
+        subscriptions.value.has(`${boardCode}:${threadId}`);
 
-    const toggleThread = async (threadId: number) => {
+    const toggleThread = async (boardCode: string, threadId: number) => {
+        const key: string = `${boardCode}:${threadId}`;
         if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
             await _connect();
         }
 
-        if (subscriptions.value.has(threadId)) {
+        if (subscriptions.value.has(key)) {
             socket.value.send(JSON.stringify({
                 action: "unsub",
-                threadId: threadId
+                key: key
             }));
-            subscriptions.value.delete(threadId);
-            console.log(`Left thread ${threadId}`);
+            subscriptions.value.delete(key);
+            console.log(`Left thread ${key}`);
         } else {
             socket.value.send(JSON.stringify({
                 action: "sub",
-                threadId: threadId
+                key: key
             }));
-            subscriptions.value.add(threadId);
-            console.log(`Joined thread ${threadId}`);
+            subscriptions.value.add(key);
+            console.log(`Joined thread ${key}`);
         }
     };
 

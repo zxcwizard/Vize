@@ -25,18 +25,26 @@ async fn handle_socket(mut socket: WebSocket) {
     while let Some(result) = socket.recv().await {
         match result {
             Ok(msg) => {
-                if let Message::Text(text) = msg {
-                    println!("Received Text: {}", text);
-                    socket
-                        .send(Message::Text(format!("Echo: {}", text).into()))
-                        .await
-                        .unwrap();
+                match msg {
+                    Message::Text(text) => {
+                        socket
+                            .send(Message::Text(format!("Echo: {}", text).into()))
+                            .await
+                            .unwrap();
+                        println!("Received Text: {}", text);
+                    }
+                    Message::Close(_) => {
+                        println!("Client requested closure");
+                        break;
+                    }
+                    _ => {}
                 }
             }
             Err(e) => {
-                panic!("Error: {:?}", e);
+                eprintln!("WebSocket error: {:?}", e);
+                break;
             }
         }
     }
-    println!("Connection closed.");
+    println!("Connection closed safely.");
 }
