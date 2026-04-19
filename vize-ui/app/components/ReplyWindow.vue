@@ -34,6 +34,7 @@ async function createPost() {
     const matches = [...form.value.comment.matchAll(/>>(\d+)/g)];
     const replyIds = matches.map((match) => Number(match[1]));
     form.value.repliesTo = [...new Set(replyIds)];
+    form.value.comment = form.value.comment.trim();
 
     await useThreadStore().createPost(form.value);
     emit('closeReply');

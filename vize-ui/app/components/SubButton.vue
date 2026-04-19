@@ -1,0 +1,38 @@
+<script lang="ts" setup>
+const props = defineProps<{
+  threadId: number
+}>();
+
+const {toggleThread, isSubscribed} = useSocketGateway();
+
+const isSubbed = computed(() => isSubscribed(props.threadId));
+</script>
+
+<template>
+  <button
+      class="subscribe-btn"
+      :class="{ 'is-active': isSubbed }"
+      @click="toggleThread(props.threadId)"
+  >
+    {{ isSubbed ? 'Subscribed' : 'Subscribe' }}
+  </button>
+</template>
+
+<style scoped lang="sass">
+.subscribe-btn
+  display: inline-block
+  padding: 0.4rem 1rem
+  border: 1px solid #000
+  font-size: 14px
+  font-weight: 600
+  letter-spacing: 0.05em
+  cursor: pointer
+  transition: all 0.15s ease
+  text-align: center
+  min-width: 8rem
+
+  &.is-active
+    background: darkgreen
+    color: #fff
+    border: 1px solid #000
+</style>
