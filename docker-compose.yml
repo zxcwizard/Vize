@@ -1,18 +1,46 @@
 services:
   postgres:
     image: postgres:latest
-    container_name: vize_pg
+    container_name: vchan_pg
     restart: unless-stopped
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: vize
+      POSTGRES_DB: vchan
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./vize-be/src/main/resources/sql:/docker-entrypoint-initdb.d
+      - ./vchan-api/src/main/resources/sql:/docker-entrypoint-initdb.d
+
+  vchan-worker:
+    build: ./vchan-worker
+    expose:
+      - "4000"
+
+  vchan-ui:
+    build: ./vchan-ui
+    volumes:
+      - ./vchan-ui:/app
+      - /app/node_modules
+
+  vchan-api:
+    build: ./vchan-api
+    expose:
+      - "8080"
+    depends_on:
+      - postgres
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/vchan.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - vchan-worker
+      - vchan-api
+      - vchan-ui
 
 volumes:
   postgres_data:
-### NODE_OPTIONS="--no-experimental-webstorage" bun run dev
