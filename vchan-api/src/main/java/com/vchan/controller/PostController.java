@@ -1,5 +1,6 @@
 package com.vchan.controller;
 
+import com.vchan.dto.Board;
 import com.vchan.dto.CreatePostRequest;
 import com.vchan.dto.GetPostResponse;
 import com.vchan.repo.PostRepository;
@@ -35,7 +36,7 @@ public class PostController {
     }
 
     @GetMapping("/count/{board}")
-    public Integer countPostsPerBoard(@PathVariable String board) {
+    public Integer countPostsPerBoard(@PathVariable Board board) {
         return postRepository.countPostsPerBoard(board);
     }
 

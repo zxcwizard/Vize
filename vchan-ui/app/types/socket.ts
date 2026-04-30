@@ -1,6 +1,6 @@
-import {Board} from './boards';
+import type {Board} from './boards';
 
-interface RoomKey {
+export interface RoomKey {
     board: Board;
     thread: number;
 }

@@ -1,33 +1,19 @@
-import type {Board} from "~/types/data";
 import {defineStore} from "pinia";
+import type {Board, BoardMetadata} from "~/types/boards";
+import {BOARD_MAP} from "~/types/boards";
 
 export const useBoardStore = defineStore('boardList', {
     state: () => ({
-        boards: [] as Board[],
+        boardMap: BOARD_MAP
     }),
 
     getters: {
+        allBoards: (state): BoardMetadata[] => Object.values(state.boardMap),
         boardExists: (state) => {
-            return (boardCode: string) => state.boards.some(b => b.code === boardCode)
-        },
-        getBoards: (state) => {
-            return () => state.boards;
+            return (code: string) => code in state.boardMap;
         },
         getBoard: (state) => {
-            return (boardCode: string): Board | undefined => {
-                return state.boards.find(b => b.code === boardCode);
-            }
-        }
-    },
-
-    actions: {
-        async fetchBoards() {
-            if (this.boards.length) return
-            try {
-                this.boards = await $fetch<Board[]>(`/api/boards`) || [];
-            } catch (error) {
-                console.error('Failed to init boards', error)
-            }
+            return (code: Board): BoardMetadata => state.boardMap[code];
         }
     }
-})
+});

@@ -2,11 +2,11 @@
 import ReplyWindow from "~/components/ReplyWindow.vue";
 import PostItem from "~/components/PostItem.vue";
 import {nextTick} from "vue";
-import {useSocketGateway} from "../../../composables/useSocket";
-import {useThreadContext} from "../../../composables/useThreadContext";
+import {useSocketGateway} from "~/composables/useSocket";
+import {useThreadContext} from "~/composables/useThreadContext";
 
 const {subscriptions} = useSocketGateway();
-const {board, currentThreadId, replies, op, threadRefresh} = useThreadContext();
+const {board, currentThreadId, replies, op, threadRefresh} = await useThreadContext();
 
 const isReplying = ref(false);
 const replyWindow = ref<InstanceType<typeof ReplyWindow>>();
@@ -22,9 +22,10 @@ const isTargetInViewport = ref(true)
 const mousePos = reactive({x: 0, y: 0})
 
 const hoveredPostData = computed(() => {
-  if (!activeId.value) return null;
-  if (activeId.value == op.value.id) return op.value;
-  return replies.value.at(activeId.value) || null;
+  if (!activeId.value || !op.value) return null;
+  const activeIdValue = Number(activeId.value);
+  if (activeIdValue == op.value.id) return op.value;
+  return replies.value.at(activeIdValue) || null;
 });
 
 const handleMouseEnter = (id: string, event: MouseEvent) => {
@@ -69,7 +70,7 @@ const handleMouseLeave = () => {
       <div class="thread-catalog-board-list">/{{ board.code }}/ - {{ board.name }}</div>
     </div>
     <hr>
-    <button class="update-btn" @click="() => refresh()">Update</button>
+    <button class="update-btn" @click="() => threadRefresh()">Update</button>
     <SubButton :thread-id="currentThreadId" :board="board.code"/>
     <div>
       <h1>subbed to</h1>
@@ -81,6 +82,7 @@ const handleMouseLeave = () => {
         @close-reply="isReplying = false;"/>
 
     <div
+        v-if="op"
         :id="op.id.toString()"
         :class="['thread-op-body', { 'highlighted': activeId === op.id.toString() && isTargetInViewport }]">
       <PostItem :post="op" @reply="reply">

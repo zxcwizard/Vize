@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type {Thread} from "~/types/data";
+import type {Board} from "~/types/boards";
 
 defineProps<{
   thread: Thread;
-  boardCode: string;
+  board: Board;
 }>();
 
 </script>
@@ -11,7 +12,7 @@ defineProps<{
 <template>
   <div class="thread-сard-body">
     <NuxtLink
-        :to="`/${boardCode}/threads/${thread.id}`"
+        :to="`/${board}/threads/${thread.id}`"
         class="thread-card-img-box">
       <img class="thread-card-img" src="https://picsum.photos/200/200" alt="Random image">
     </NuxtLink>

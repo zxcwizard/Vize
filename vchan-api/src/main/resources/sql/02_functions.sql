@@ -1,15 +1,15 @@
-CREATE OR REPLACE FUNCTION create_board_sequence()
-    RETURNS TRIGGER AS
-$$
+CREATE OR REPLACE PROCEDURE initialize_board_sequences()
+    LANGUAGE plpgsql
+AS $$
+DECLARE
+    board_name TEXT;
+    board_list TEXT[] := enum_range(NULL::board_code)::text[];
 BEGIN
-    EXECUTE 'CREATE SEQUENCE IF NOT EXISTS ' || QUOTE_IDENT(NEW.code) ||
-            '_seq AS INTEGER CYCLE OWNED BY boards.code; ';
-    RETURN NEW;
+    FOREACH board_name IN ARRAY board_list
+        LOOP
+            EXECUTE format('CREATE SEQUENCE IF NOT EXISTS %I_seq AS INTEGER CYCLE', board_name);
+        END LOOP;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE TRIGGER create_board_seq
-    AFTER INSERT
-    ON boards
-    FOR EACH ROW
-EXECUTE FUNCTION create_board_sequence();
+CALL initialize_board_sequences();

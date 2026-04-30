@@ -1,14 +1,13 @@
 package com.vchan.dto;
 
-import com.vchan.validation.ExistingBoard;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 public record CreatePostRequest(
-        @NotBlank
-        @ExistingBoard
-        String board,
+        @NotNull
+        Board board,
 
         @NotBlank
         String comment,

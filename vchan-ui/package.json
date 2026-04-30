@@ -15,7 +15,7 @@
     "@unhead/vue": "^2.1.13",
     "@vue/devtools-kit": "8.0.6",
     "eslint": "^9.39.4",
-    "isomorphic-dompurify": "^3.10.0",
+    "isomorphic-dompurify": "^3.11.0",
     "nuxt": "^4.4.2",
     "pinia": "^3.0.4",
     "typescript": "^5.9.3",

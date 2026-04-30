@@ -1,12 +1,11 @@
 package com.vchan.dto;
 
-import com.vchan.validation.ExistingBoard;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CreateThreadRequest(
-        @NotBlank
-        @ExistingBoard
-        String boardCode,
+        @NotNull
+        Board board,
 
         @NotBlank
         String name,

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 
 import type {CreatePost} from "~/types/data";
-import {useSocketGateway} from "../composables/useSocket";
+import {useSocketGateway} from "~/composables/useSocket";
+import type {Board} from "~/types/boards";
 
 const emit = defineEmits(['closeReply']);
-const props = defineProps({
-  board: {type: String, required: true},
-  thread: {type: Number, required: true}
-})
+const props = defineProps<{
+  board: Board;
+  thread: number;
+}>()
 const input = ref<HTMLTextAreaElement | null>(null);
 const isSubmitting = ref(false);
 const form = ref<CreatePost>({

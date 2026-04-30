@@ -1,7 +1,4 @@
-export interface Board {
-    code: string;
-    name: string;
-}
+import type {Board} from "~/types/boards";
 
 export interface Post {
     id: number;
@@ -11,7 +8,7 @@ export interface Post {
 }
 
 export interface CreatePost {
-    board: string;
+    board: Board;
     threadId: number;
     comment: string;
     repliesTo: number[];

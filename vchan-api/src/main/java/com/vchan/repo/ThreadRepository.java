@@ -1,9 +1,7 @@
 package com.vchan.repo;
 
-import com.vchan.dto.CreateThreadRequest;
-import com.vchan.dto.GetFullThreadResponse;
-import com.vchan.dto.GetPostResponse;
-import com.vchan.dto.GetThreadCardResponse;
+import com.vchan.dto.*;
+import com.vchan.jooq.generated.public_.enums.BoardCode;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Records;
@@ -27,14 +25,15 @@ public class ThreadRepository {
     private final DSLContext context;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy(EEE)HH:mm:ss");
 
-    public GetFullThreadResponse getFullThread(String board, Integer thread) {
-        return context.select(
+    public GetFullThreadResponse getFullThread(Board board, Integer thread) {
+        BoardCode boardCode = BoardCode.valueOf(board.lc_name());
+        var result = context.select(
                         THREADS.ID.as("id"),
                         THREADS.NAME.as("name"),
                         multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
                                 select(POST_REPLIES.REPLY_FROM)
                                         .from(POST_REPLIES)
-                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD_CODE.eq(POSTS.BOARD_CODE)))
+                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD.eq(POSTS.BOARD)))
                         ))
                                 .orderBy(POSTS.ID.asc())
                                 .convertFrom(x -> x.map(record -> new GetPostResponse(
@@ -44,14 +43,16 @@ public class ThreadRepository {
                                         record.component4().getValues(POST_REPLIES.REPLY_FROM)
                                 ))))
                 .from(THREADS)
-                .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD_CODE.eq(board)))
-                .where(THREADS.BOARD_CODE.eq(board).and(THREADS.ID.eq(thread)))
-                .groupBy(THREADS.ID, THREADS.BOARD_CODE, THREADS.NAME)
+                .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD.eq(boardCode)))
+                .where(THREADS.BOARD.eq(boardCode).and(THREADS.ID.eq(thread)))
+                .groupBy(THREADS.ID, THREADS.BOARD, THREADS.NAME)
                 .fetchOne(Records.mapping(GetFullThreadResponse::new));
+        System.out.println(result);
+        return result;
     }
 
-    public List<GetThreadCardResponse> getThreadCards(String code) {
-        //Order inside select must match fetch target DTO
+    public List<GetThreadCardResponse> getThreadCards(Board board) {
+        BoardCode boardCode = BoardCode.valueOf(board.lc_name());
         return context.select(
                         THREADS.ID.as("id"),
                         POSTS.COMMENT.as("comment"),
@@ -59,20 +60,21 @@ public class ThreadRepository {
                         POSTS.CREATED_AT.as("createdAt"))
                 .from(THREADS)
                 .join(POSTS)
-                .on(THREADS.ID.eq(POSTS.ID).and(POSTS.BOARD_CODE.eq(code)))
-                .where(THREADS.BOARD_CODE.eq(code))
+                .on(THREADS.ID.eq(POSTS.ID).and(POSTS.BOARD.eq(boardCode)))
+                .where(THREADS.BOARD.eq(boardCode))
                 .fetch()
                 .map(Records.mapping(GetThreadCardResponse::new));
     }
 
-    public List<GetFullThreadResponse> getThreads(String code) {
+    public List<GetFullThreadResponse> getThreads(Board board) {
+        BoardCode boardCode = BoardCode.valueOf(board.lc_name());
         return context.select(
                         THREADS.ID.as("id"),
                         THREADS.NAME.as("name"),
                         multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
                                 select(POST_REPLIES.REPLY_FROM)
                                         .from(POST_REPLIES)
-                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD_CODE.eq(POSTS.BOARD_CODE)))
+                                        .where(POST_REPLIES.REPLY_TO.eq(POSTS.ID).and(POST_REPLIES.BOARD.eq(POSTS.BOARD)))
                         ))
                                 .orderBy(POSTS.ID.asc())
                                 .convertFrom(x -> x.map(record -> new GetPostResponse(
@@ -82,22 +84,23 @@ public class ThreadRepository {
                                         record.component4().getValues(POST_REPLIES.REPLY_FROM)
                                 ))))
                 .from(THREADS)
-                .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD_CODE.eq(code)))
-                .where(THREADS.BOARD_CODE.eq(code))
-                .groupBy(THREADS.ID, THREADS.BOARD_CODE, THREADS.NAME)
+                .join(POSTS).on(THREADS.ID.eq(POSTS.THREAD_ID).and(POSTS.BOARD.eq(boardCode)))
+                .where(THREADS.BOARD.eq(boardCode))
+                .groupBy(THREADS.ID, THREADS.BOARD, THREADS.NAME)
                 .fetch(Records.mapping(GetFullThreadResponse::new));
     }
 
     public void createThread(CreateThreadRequest requestThreadDTO) {
-        String sequence = requestThreadDTO.boardCode().concat("_seq");
+        BoardCode boardCode = BoardCode.valueOf(requestThreadDTO.board().lc_name());
+        String sequence = requestThreadDTO.board().lc_name().concat("_seq");
         var nextval = context.dsl().nextval(sequence).intValue();
 
-        context.insertInto(THREADS, THREADS.ID, THREADS.BOARD_CODE, THREADS.NAME)
-                .values(nextval, requestThreadDTO.boardCode(), requestThreadDTO.name())
+        context.insertInto(THREADS, THREADS.ID, THREADS.BOARD, THREADS.NAME)
+                .values(nextval, boardCode, requestThreadDTO.name())
                 .execute();
 
-        context.insertInto(POSTS, POSTS.ID, POSTS.THREAD_ID, POSTS.BOARD_CODE, POSTS.COMMENT)
-                .values(nextval, nextval, requestThreadDTO.boardCode(), requestThreadDTO.comment())
+        context.insertInto(POSTS, POSTS.ID, POSTS.THREAD_ID, POSTS.BOARD, POSTS.COMMENT)
+                .values(nextval, nextval, boardCode, requestThreadDTO.comment())
                 .execute();
     }
 }

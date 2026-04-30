@@ -1,7 +1,8 @@
 <script setup lang="ts">
-const totalPosts = await useFetch(`/api/posts/count`);
-const postsToday = await useFetch(`/api/posts/countToday`);
+const opts = { baseURL: import.meta.server ? 'http://vchan-api/api' : '/api' };
 
+const { data: totalPosts } = await useFetch<number>('/posts/count', opts);
+const { data: postsToday } = await useFetch<number>('/posts/countToday', opts);
 </script>
 
 <template>
@@ -30,11 +31,11 @@ const postsToday = await useFetch(`/api/posts/countToday`);
           <div class="stat-label">Active Threads</div>
         </div>
         <div>
-          <div class="stat-value">{{ postsToday.data.value }}</div>
+          <div class="stat-value">{{ postsToday }}</div>
           <div class="stat-label">Posts Today</div>
         </div>
         <div>
-          <div class="stat-value">{{ totalPosts.data.value }}</div>
+          <div class="stat-value">{{ totalPosts }}</div>
           <div class="stat-label">Total Posts</div>
         </div>
       </div>

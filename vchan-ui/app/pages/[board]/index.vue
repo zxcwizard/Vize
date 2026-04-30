@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import {useBoardContext} from "../../composables/useBoardContext";
-
-definePageMeta({
-  middleware: 'validate-board'
-})
+import {useBoardContext} from "~/composables/useBoardContext";
 
 const {board} = useBoardContext();
-const {threadCardData, threadCardRefresh} = useThreadCardList();
+const {threadCardData, threadCardRefresh} = await useThreadCardList();
 const isCreatingThread = ref(false);
 const form = ref({
       name: '',
@@ -19,7 +15,7 @@ async function createThread() {
     method: 'POST',
     body: {
       ...form.value,
-      board: board.value.code
+      board: board.value
     }
   })
   isCreatingThread.value = false;
@@ -58,7 +54,7 @@ async function createThread() {
           :id="thread.id"
           :key="thread.id"
           :thread="thread"
-          :board-code="board.code"
+          :board="board.code"
       />
     </div>
   </div>

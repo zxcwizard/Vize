@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type {Board} from "~/types/data";
 import {useBoardStore} from "~/stores/boards";
+import type {BoardMetadata} from "~/types/boards";
 
-await useBoardStore().fetchBoards()
-const boards: Board[] = useBoardStore().getBoards();
+const boards: BoardMetadata[] = useBoardStore().allBoards;
 
 </script>
 

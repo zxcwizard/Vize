@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import type {Board} from "~/types/boards";
+
 const props = defineProps<{
   threadId: number
-  board: string
+  board: Board
 }>();
 
 const {toggleThread, isSubscribed} = useSocketGateway();
