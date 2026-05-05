@@ -21,9 +21,6 @@ export interface Thread {
 }
 
 export interface OpPost {
-    id: number;
-    comment: string;
-    name: string
-    createdAt: string;
-    repliesFrom: number[];
+    post: Post;
+    name: string;
 }

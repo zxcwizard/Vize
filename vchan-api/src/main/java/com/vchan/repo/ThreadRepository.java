@@ -27,7 +27,7 @@ public class ThreadRepository {
 
     public GetFullThreadResponse getFullThread(Board board, Integer thread) {
         BoardCode boardCode = BoardCode.valueOf(board.lc_name());
-        var result = context.select(
+        return context.select(
                         THREADS.ID.as("id"),
                         THREADS.NAME.as("name"),
                         multisetAgg(POSTS.ID, POSTS.COMMENT, POSTS.CREATED_AT, DSL.multiset(
@@ -47,8 +47,6 @@ public class ThreadRepository {
                 .where(THREADS.BOARD.eq(boardCode).and(THREADS.ID.eq(thread)))
                 .groupBy(THREADS.ID, THREADS.BOARD, THREADS.NAME)
                 .fetchOne(Records.mapping(GetFullThreadResponse::new));
-        System.out.println(result);
-        return result;
     }
 
     public List<GetThreadCardResponse> getThreadCards(Board board) {

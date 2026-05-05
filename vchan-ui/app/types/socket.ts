@@ -11,8 +11,9 @@ export type WsMessage =
     | { type: 'KillThread', data: RoomKey }
     | { type: 'Notification', data: NotificationPayload };
 
-interface NotificationPayload {
+export interface NotificationPayload {
     board: Board;
+    new_post: number;
     thread: number;
     payload: string;
 }

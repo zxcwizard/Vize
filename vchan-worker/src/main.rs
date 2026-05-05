@@ -121,14 +121,14 @@ async fn handle_socket(socket: WebSocket, uuid: Uuid, registry: ConnectionRegist
                         registry.remove(&roomkey);
                     },
                     WsMessage::Notification { .. } => {
-                        let Some(payload) = ws_msg.into_message() else {
+                        let Some(msg) = ws_msg.into_message() else {
                             eprintln!("Wrong message type from {uuid}");
                             continue;
                         };
                         if let Some(room) = registry.get(&roomkey) {
                             room.iter()
                                 .filter(|entry| *entry.key() != uuid)
-                                .for_each(|entry| { let _ = entry.value().send(payload.clone());
+                                .for_each(|entry| { let _ = entry.value().send(msg.clone());
                             });
                         }
                     }

@@ -1,11 +1,12 @@
 import type {RoomKey, WsMessage} from '@/types/socket'
 import type {Board} from '@/types/boards'
-
-const socket = ref<WebSocket | null>(null);
-const subscriptions = ref(new Set<string>());
-const messages = ref<Record<number, string[]>>({});
+import {useNotificationStore} from "~/stores/notifications";
 
 export const useSocketGateway = () => {
+    const socket = ref<WebSocket | null>(null);
+    const subscriptions = ref(new Set<string>());
+    const notificationStore = useNotificationStore();
+
     const _connect = () => {
         return new Promise<void>((resolve, reject) => {
             if (socket.value && socket.value.readyState === WebSocket.OPEN) return resolve();
@@ -22,9 +23,7 @@ export const useSocketGateway = () => {
                     const msg: WsMessage = JSON.parse(event.data);
                     switch (msg.type) {
                         case 'Notification': {
-                            const threadId = msg.data.thread;
-                            const currentMessages = messages.value[threadId] || [];
-                            messages.value[threadId] = [...currentMessages, msg.data.payload];
+                            notificationStore.addNotification(msg.data)
                             break;
                         }
                         default:
@@ -47,14 +46,15 @@ export const useSocketGateway = () => {
         });
     };
 
+    const getKeyString = (board: Board, threadId: number) => `${board}:${threadId}`;
 
-    const isSubscribed = (boardCode: string, threadId: number) => {
-        return subscriptions.value.has(`${boardCode}:${threadId}`);
+    const isSubscribed = (board: Board, threadId: number) => {
+        return subscriptions.value.has(getKeyString(board, threadId));
     }
 
     const toggleThread = async (board: Board, threadId: number) => {
         const key: RoomKey = {board: board, thread: threadId};
-        const subKey = `${board}:${threadId}`;
+        const subKey = getKeyString(board, threadId);
         if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
             await _connect();
         }
@@ -80,7 +80,7 @@ export const useSocketGateway = () => {
         }
     };
 
-    const notify = async (board: Board, threadId: number, message: string) => {
+    const notify = async (board: Board, threadId: number, newPost: number, message: string) => {
         if (!socket.value || socket.value.readyState !== WebSocket.OPEN) {
             await _connect();
         }
@@ -95,11 +95,12 @@ export const useSocketGateway = () => {
             data: {
                 board: board,
                 thread: threadId,
+                new_post: newPost,
                 payload: message
             },
         };
         socket.value.send(JSON.stringify(event));
         console.log("Announcement sent to Rust worker:", message);
     };
-    return {toggleThread, isSubscribed, notify, messages, subscriptions};
+    return {toggleThread, isSubscribed, notify, subscriptions};
 };

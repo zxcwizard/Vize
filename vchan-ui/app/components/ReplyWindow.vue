@@ -39,8 +39,8 @@ async function createPost() {
     form.value.repliesTo = [...new Set(replyIds)];
     form.value.comment = form.value.comment.trim();
 
-    await useThreadStore().createPost(form.value);
-    notify(props.board, props.thread, form.value.comment);
+    const id = await useThreadStore().createPost(form.value);
+    if (id) notify(props.board, props.thread, id, form.value.comment);
     emit('closeReply');
   } catch (error) {
     console.error("Failed to post:", error);

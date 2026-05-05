@@ -12,6 +12,7 @@ pub enum WsMessage {
         #[serde(flatten)]
         key: RoomKey,
         payload: String,
+        new_post: u32
     },
 }
 

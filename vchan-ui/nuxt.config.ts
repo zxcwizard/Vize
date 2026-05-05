@@ -7,6 +7,14 @@ export default defineNuxtConfig({
             apiBase: '/api'
         }
     },
+    icon: {
+        clientBundle: {
+            icons: [
+                'material-symbols:notifications-rounded',
+                'material-symbols:chat-bubble-outline-rounded'
+            ]
+        }
+    },
     vite: {
         server: {
             allowedHosts: ['vchan']
@@ -20,6 +28,7 @@ export default defineNuxtConfig({
     },
     modules: [
         '@pinia/nuxt',
-        '@nuxt/eslint'
+        '@nuxt/eslint',
+        '@nuxt/icon'
     ]
 })

@@ -8,6 +8,11 @@
     <main>
       <slot />
     </main>
+    <div class="notification-layout-zone">
+      <ClientOnly>
+        <NotificationAnchor />
+      </ClientOnly>
+    </div>
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-links">

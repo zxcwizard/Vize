@@ -24,7 +24,7 @@ const mousePos = reactive({x: 0, y: 0})
 const hoveredPostData = computed(() => {
   if (!activeId.value || !op.value) return null;
   const activeIdValue = Number(activeId.value);
-  if (activeIdValue == op.value.id) return op.value;
+  if (activeIdValue == op.value.post.id) return op.value.post;
   return replies.value.at(activeIdValue) || null;
 });
 
@@ -83,12 +83,12 @@ const handleMouseLeave = () => {
 
     <div
         v-if="op"
-        :id="op.id.toString()"
-        :class="['thread-op-body', { 'highlighted': activeId === op.id.toString() && isTargetInViewport }]">
-      <PostItem :post="op" @reply="reply">
+        :id="op.post.id.toString()"
+        :class="['thread-op-body', { 'highlighted': activeId === op.post.id.toString() && isTargetInViewport }]">
+      <PostItem :post="op.post" :name="op.name" @reply="reply">
         <template #backlinks>
           <a
-              v-for="replyId in op.repliesFrom" :key="replyId" :href="`#${replyId}`" class="thread-post-replies"
+              v-for="replyId in op.post.repliesFrom" :key="replyId" :href="`#${replyId}`" class="thread-post-replies"
               @mouseover="handleMouseEnter(replyId.toString(), $event)" @mouseleave="handleMouseLeave">>>{{
               replyId
             }}</a>

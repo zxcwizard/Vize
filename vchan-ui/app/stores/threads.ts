@@ -41,11 +41,8 @@ export const useThreadStore = defineStore('threads', {
             if (!firstPost) return null;
 
             return {
-                id: thread.id,
-                comment: firstPost.comment,
-                createdAt: firstPost.createdAt,
+                post: firstPost,
                 name: thread.name,
-                repliesFrom: firstPost.repliesFrom
             };
         }
     },
@@ -124,6 +121,7 @@ export const useThreadStore = defineStore('threads', {
                             if (match) post.repliesFrom.push(createdPost.id);
                         });
                         thread.posts.push(createdPost);
+                        return createdPost.id;
                     }
                 }
             } catch (err: unknown) {
