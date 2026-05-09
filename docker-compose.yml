@@ -13,6 +13,18 @@ services:
       - postgres_data:/var/lib/postgresql
       - ./vchan-api/src/main/resources/sql:/docker-entrypoint-initdb.d
 
+  nats:
+    image: nats:latest
+    container_name: nats-server
+    ports:
+      - "4222:4222" # Client port
+      - "8222:8222" # HTTP Monitoring port (view in browser at localhost:8222)
+      - "6222:6222" # Cluster routing port
+    volumes:
+      - nats-data:/data
+    command: [ "-js", "-m", "8222" ]
+    restart: unless-stopped
+
   vchan-worker:
     build: ./vchan-worker
     expose:
@@ -44,3 +56,4 @@ services:
 
 volumes:
   postgres_data:
+  nats-data:

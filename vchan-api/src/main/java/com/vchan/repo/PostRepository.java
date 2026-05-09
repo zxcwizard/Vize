@@ -1,5 +1,6 @@
 package com.vchan.repo;
 
+import com.vchan.api.proto.Message;
 import com.vchan.dto.Board;
 import com.vchan.dto.CreatePostRequest;
 import com.vchan.dto.GetPostResponse;

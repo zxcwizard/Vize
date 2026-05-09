@@ -4,6 +4,8 @@ pub mod entities {
     pub mod room_key;
 }
 
+pub mod vchan_messages { include!(concat!(env!("OUT_DIR"), "/vchan.rs")); }
+
 use crate::entities::message::WsMessage;
 use crate::entities::room_key::RoomKey;
 use axum::extract::ws::{Message, WebSocket};
@@ -25,6 +27,7 @@ type ConnectionRegistry = Arc<DashMap<RoomKey, DashMap<Uuid, UnboundedSender<Mes
 
 #[tokio::main]
 async fn main() {
+    async_nats::connect("127.0.0.1:4222").await.unwrap();
     let connections: ConnectionRegistry = Arc::new(DashMap::new());
 
     let app = Router::new()

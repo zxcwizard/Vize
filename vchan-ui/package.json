@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:proto": "bun x pbjs -t static-module -w es6 -o generated_sources/proto.js ../contract/message.proto && pbts -o generated_sources/proto.d.ts generated_sources/proto.js",
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
@@ -10,23 +11,25 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@iconify-json/material-symbols": "^1.2.69",
+    "@iconify-json/material-symbols": "^1.2.71",
     "@nuxt/eslint": "1.5.0",
     "@nuxt/icon": "^2.2.2",
     "@pinia/nuxt": "^0.11.3",
-    "@unhead/vue": "^2.1.13",
+    "@unhead/vue": "^2.1.15",
     "@vue/devtools-kit": "8.0.6",
     "eslint": "^9.39.4",
     "isomorphic-dompurify": "^3.12.0",
     "nuxt": "^4.4.4",
     "pinia": "^3.0.4",
+    "protobufjs": "^8.0.3",
     "typescript": "^5.9.3",
-    "vue": "^3.5.33",
+    "vue": "^3.5.34",
     "vue-dompurify-html": "^5.3.0",
     "vue-router": "^4.6.4",
     "vue-tsc": "^3.2.8"
   },
   "devDependencies": {
+    "protobufjs-cli": "^2.0.3",
     "sass-embedded": "^1.99.0"
   }
 }

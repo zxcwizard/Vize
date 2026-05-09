@@ -8,6 +8,8 @@ dist
 
 # Node dependencies
 node_modules
+# Proto data
+generated_sources
 
 # Logs
 logs

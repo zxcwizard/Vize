@@ -1,0 +1,10 @@
+syntax = "proto3";
+package vchan;
+option java_package = "com.vchan.api.proto";
+
+message ThreadNotification {
+  string threadId = 1;
+  string postId = 2;
+  string author = 3;
+  string contentSnippet = 4;
+}
